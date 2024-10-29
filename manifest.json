@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Capsule CRM Helper",
+  "description": "Use OpenAI's API to generate email content and summaries based on Capsule CRM data.",
+  "version": "1.0",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "webNavigation",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://api.openai.com/"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.capsulecrm.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
