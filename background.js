@@ -13,7 +13,7 @@ chrome.storage.local.set({ testMode: false }, function() {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Generate an email via openAI
-    if (message.action === "generateEmail") {
+    if (message.action === "generateEmail")  {
         getOpenAIEmail()
             .then(generatedEmail => {
                 sendResponse({ email: generatedEmail });
