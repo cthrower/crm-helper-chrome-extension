@@ -1,10 +1,13 @@
-chrome.storage.local.set({ apiKeyPhonely: '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' }, function() {
+/*chrome.storage.local.set({ apiKeyPhonely: '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' }, function() {
     console.log('Phonely API key stored');
 });
 
 chrome.storage.local.set({ apiKeySbf: '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' }, function() {
     console.log('SBF API key stored');
-});
+}); */
+
+
+
 
 
 chrome.storage.local.set({ testMode: false }, function() {
@@ -198,6 +201,12 @@ async function getOpenAIEmail() {
 
             prompt = `Write me an email follow up to an existing lead for ${brand}, a UK-based digital landline service. The email should use the "four c's" framework to create clea, concise, compelling and credible copy for the following customer persona: ${customerPersona}. Use this checklist to ensure that our message is effectively communicated and persuades the reader to take action. Include talking points such as our built-in scam protection and UK-based customer service. Do NOT summarise the 4 c's in the content, simply just return me a well formatted email ready to send. The Email should be written in first person. Here's the notes and recent emails from the CRM for this customer: \n\n${crmContent.join('\n\n')}\n\n. Provide the subject line and the email body separately:Subject Line:\nEmail Body: - Remember to keep the email friendly and informative, and to include a clear call to action. DO NOT INCLUDE AN EMAIL FOOTER OR SIGNATURE. Don’t always use the most natural words. Use the following words fewer than 3 times on this page: unique, ensure, utmost. Before outputting the content, review it for the following words and rewrite those sentences with appropriate alternatives: meticulous, meticulously, navigating, complexities, realm, bespoke, tailored, towards, underpins, everchanging, ever-evolving, the world of, not only, seeking more than just, designed to enhance, it’s not merely, our suite, it is advisable, daunting, in the heart of, when it comes to, in the realm of, amongst unlock the secrets, unveil the secrets, and robust. Ensure heterogeneous paragraphs. Ensure heterogeneous sentence lengths. And stick to primarily short, straightforward sentences. Do not include any fluff when producing content. Each sentence should provide value to the overall goal of the content piece. Strictly follow this guideline. Engagement is the highest priority. Be conversational, empathetic, and occasionally humorous. Use idioms, metaphors, anecdotes and natural dialogue. Finally, take a deep breath and take it step by step. Do not begin the email with "I hope this message finds you well", try and keep the emails concise, and to the point.`;
 
+        } else if (url && url.includes('datasoap.capsulecrm')) {
+            // Datasoap CRM - Update the prompts
+            customerPersona = 'Demographics: Age: 42, Gender: Male, Location: Greater London, UK, Occupation: Business Owner/Director, Industry: Commercial Cleaning, Company Size: 5-20 employees, Education: Trade qualification or business management background, Income: £45,000-£75,000 per year. Background: Owns or manages a commercial cleaning business serving offices, schools, or industrial facilities. Primary concerns include managing cleaning schedules, staff allocation, and maintaining cleaning standards. Challenges: Staff Management: Coordinating cleaning teams across multiple locations, Managing Supplies: Tracking and ordering cleaning supplies efficiently, Quality Control: Ensuring consistent cleaning standards across all sites, Client Communication: Maintaining professional relationships with facility managers.';
+            brand = 'Datasoap';
+
+            prompt = `Write me an email follow up to an existing lead for ${brand}, a UK-based cleaning management software solution. The email should use the "four c's" framework to create clear, concise, compelling and credible copy for the following customer persona: ${customerPersona}. Use this checklist to ensure that our message is effectively communicated and persuades the reader to take action. Include talking points such as our automated scheduling system and real-time reporting features. Do NOT summarise the 4 c's in the content, simply just return me a well formatted email ready to send. The Email should be written in first person. Here's the notes and recent emails from the CRM for this customer: \n\n${crmContent.join('\n\n')}\n\n. Provide the subject line and the email body separately:Subject Line:\nEmail Body: - Remember to keep the email friendly and informative, and to include a clear call to action. DO NOT INCLUDE AN EMAIL FOOTER OR SIGNATURE. Don't always use the most natural words. Use the following words fewer than 3 times on this page: unique, ensure, utmost. Before outputting the content, review it for the following words and rewrite those sentences with appropriate alternatives: meticulous, meticulously, navigating, complexities, realm, bespoke, tailored, towards, underpins, everchanging, ever-evolving, the world of, not only, seeking more than just, designed to enhance, it's not merely, our suite, it is advisable, daunting, in the heart of, when it comes to, in the realm of, amongst unlock the secrets, unveil the secrets, and robust. Ensure heterogeneous paragraphs. Ensure heterogeneous sentence lengths. And stick to primarily short, straightforward sentences. Do not include any fluff when producing content. Each sentence should provide value to the overall goal of the content piece. Strictly follow this guideline. Engagement is the highest priority. Be conversational, empathetic, and occasionally humorous. Use idioms, metaphors, anecdotes and natural dialogue. Finally, take a deep breath and take it step by step. Do not begin the email with "I hope this message finds you well", try and keep the emails concise, and to the point.`;
         }
 
         const requestBody = {
@@ -282,17 +291,29 @@ function getApiKey(url) {
         if (url && url.includes('switchboardfree.capsulecrm')) {
             chrome.storage.local.get('apiKeySbf', function(result) {
                 if (chrome.runtime.lastError) {
-                    console.error('Error getting API key from storage:', chrome.runtime.lastError);
                     reject(chrome.runtime.lastError);
+                } else if (!result.apiKeySbf) {
+                    reject(new Error('SBF API key not found. Please set up your API keys.'));
                 } else {
                     resolve(result.apiKeySbf);
+                }
+            });
+        } else if (url && url.includes('liquid11.capsulecrm')) {
+            chrome.storage.local.get('apiKeyDatasoap', function(result) {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                } else if (!result.apiKeyDatasoap) {
+                    reject(new Error('Datasoap API key not found. Please set up your API keys.'));
+                } else {
+                    resolve(result.apiKeyDatasoap);
                 }
             });
         } else {
             chrome.storage.local.get('apiKeyPhonely', function(result) {
                 if (chrome.runtime.lastError) {
-                    console.error('Error getting API key from storage:', chrome.runtime.lastError);
                     reject(chrome.runtime.lastError);
+                } else if (!result.apiKeyPhonely) {
+                    reject(new Error('Phonely API key not found. Please set up your API keys.'));
                 } else {
                     resolve(result.apiKeyPhonely);
                 }
