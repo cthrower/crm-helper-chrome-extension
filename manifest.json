@@ -10,7 +10,8 @@
     "tabs"
   ],
   "host_permissions": [
-    "https://api.openai.com/"
+    "https://api.openai.com/",
+    "https://pastebin.com/"
   ],
   "background": {
     "service_worker": "background.js"
