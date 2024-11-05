@@ -91,12 +91,38 @@ function getContent() {
     return new Promise((resolve, reject) => {
         const entryBodies = document.querySelectorAll('.entry-body');
         const crmContents = [];
+        const crmName = document.querySelectorAll('.party-details__title');
+
+        if(crmName.length>0){
+
+            chrome.storage.local.set({ recipientName: crmName[0].outerText}, function() {
+                if (chrome.runtime.lastError) {
+                    console.error(
+                        "Error setting recipient name to " + JSON.stringify(crmName[0].outerText) +
+                        ": " + chrome.runtime.lastError.message
+                    );         
+                } 
+            });
+        }
+
+        console.log('hello', crmName)
 
         entryBodies.forEach(entryBody => {
             const preElement = entryBody.querySelector('pre.pre');
 
             if (preElement && preElement.textContent.trim() !== '') {
-                crmContents.push(preElement.textContent.trim());
+                let trimmedContent = preElement.textContent.trim();
+                let cleanedContent = trimmedContent
+                    .replace(/[_*~`>#-]+/g, '')             // Removes *, _, ~, `, #, >, and - symbols
+                    .replace(/\[(.*?)\]\(.*?\)/g, '$1')     // Removes link URLs but keeps the link text
+                    .replace(/!\[.*?\]\(.*?\)/g, '')        // Removes images
+                    .replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, '$1') // Removes bold/italic markers
+                    .replace(/```[\s\S]*?```/g, '')         // Removes code blocks
+                    .replace(/`([^`]+)`/g, '$1');           // Removes inline code
+        
+                crmContents.push(cleanedContent);                
+                
+                
             }
         });
 
@@ -244,7 +270,7 @@ function CreateEmail(emailContent, subjectLine) {
         const observer = new MutationObserver((mutations, obs) => {
             const emailSujectLineEditorDiv = document.querySelector('div.email-editor-subject__editor > div[contenteditable="true"]');
             if(emailSujectLineEditorDiv) {
-                emailSujectLineEditorDiv.innerHTML = subjectLine.replace('**Subject Line:** ', '').replace('**', '');
+                emailSujectLineEditorDiv.innerHTML = subjectLine.replace('Subject:', '').replace('**', '');
             }
 
             const emailEditorDiv = document.querySelector('div.email-editor-body__editor > div[contenteditable="true"]');

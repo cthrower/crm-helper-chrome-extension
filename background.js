@@ -21,6 +21,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "generateEmail")  {
         getOpenAIEmail()
             .then(generatedEmail => {
+                console.log('did we get here?', generatedEmail);
                 sendResponse({ email: generatedEmail });
             })
             .catch(error => {
@@ -186,61 +187,39 @@ async function getOpenAIEmail() {
         const url = tab.url;
 
         const apiKey = await getApiKey(url);
-
         const apiUrl = 'https://api.openai.com/v1/chat/completions';
         const crmContent = await getPageData();
+        const recipientName = await getRecipName();
 
-        /*let brand = 'Phonely'
-        let customerPersona = 'Age: 55-70. Occupation: Retired or nearing retirement. Location: Suburban or rural areas with traditional landline services, such as smaller towns where fiber is being installed (e.g., Meppershall in Bedfordshire). Marital Status: Married or widowed, with children who have moved out. Technology Comfort Level: Moderate to low. Sarah uses technology like smartphones or tablets but prefers simpler, familiar communication methods like her landline.Primary Communication Needs: Staying connected with family (children, grandchildren) and close friends. Relies heavily on her landline for clear, uninterrupted calls, especially in emergencies.'
-        let templatesUrl = 'https://docs.google.com/document/d/1bCjic-NmhpZYs9tN5e_9Sh1Mh5Nh_ed-m3DeGZNTOHo/edit?usp=sharing';
-        let plansUrl = 'https://www.phonely.co.uk/plans'
-        let prompt = `Write me an email follow up to an existing lead for ${brand}, a UK-based digital landline service. The email should use the "four c's" framework to create clea, concise, compelling and credible copy for the following customer persona: ${customerPersona}. Use this checklist to ensure that our message is effectively communicated and persuades the reader to take action. Include talking points such as our built-in scam protection and UK-based customer service. Do NOT summarise the 4 c's in the content, simply just return me a well formatted email ready to send. The Email should be written in first person. Here's the notes and recent emails from the CRM for this customer: \n\n${crmContent.join('\n\n')}\n\n. Provide the subject line and the email body separately:Subject Line:\nEmail Body: - IMPORTANT: Use the following URL's for reference: existing email templates: ${templatesUrl}, a link to our plans page: ${plansUrl}. Remember to keep the email friendly and informative, and to include a clear call to action. DO NOT INCLUDE AN EMAIL FOOTER OR SIGNATURE. Don’t always use the most natural words. Use the following words fewer than 3 times on this page: unique, ensure, utmost. Before outputting the content, review it for the following words and rewrite those sentences with appropriate alternatives: meticulous, meticulously, navigating, complexities, realm, bespoke, tailored, towards, underpins, everchanging, ever-evolving, the world of, not only, seeking more than just, designed to enhance, it’s not merely, our suite, it is advisable, daunting, in the heart of, when it comes to, in the realm of, amongst unlock the secrets, unveil the secrets, and robust. Ensure heterogeneous paragraphs. Ensure heterogeneous sentence lengths. And stick to primarily short, straightforward sentences. Do not include any fluff when producing content. Each sentence should provide value to the overall goal of the content piece. Strictly follow this guideline. Engagement is the highest priority. Be conversational, empathetic, and occasionally humorous. Use idioms, metaphors, anecdotes and natural dialogue. Finally, take a deep breath and take it step by step. Do not begin the email with "I hope this message finds you well", try and keep the emails concise, and to the point.`;
-
-        if (url && url.includes('switchboardfree.capsulecrm')) {
-            // SBF CRM - Let's update the prompts
-            customerPersona = 'Demographics: Age: 38, Gender: Female, Location: London, UK, Occupation: Office Manager, Industry: Professional Services, Company Size: 15-50 employees, Education: Bachelor’s degree, Income: £50,000 per year, Background: office manager or business owner at a mid-sized company. Her responsibilities include managing day-to-day operations, ensuring smooth communication between her firm’s employees and clients, and maintaining the firm’s technology and office systems. The law firm has a mix of in-office staff and remote workers. Managing client calls is critical to their success, and they need a reliable, professional communication system. Challenges: Inefficient Communication: The current phone system is outdated and can’t handle remote work seamlessly. Missed calls and a lack of call forwarding features make it difficult to ensure that client calls are handled professionally. High Operational Costs: The firm is paying high rates for multiple phone lines and services that don’t integrate with their current office setup. Remote Team Management: As the firm adopts a hybrid work model, Emily struggles to maintain efficient communication across in-office and remote staff members. Client Confidentiality: Ensuring that sensitive client information is handled securely is critical for Emily and the law firm’s compliance requirements.'
-            brand = 'SwitchboardFREE'
-
-            prompt = `Write me an email follow up to an existing lead for ${brand}, a UK-based digital landline service. The email should use the "four c's" framework to create clea, concise, compelling and credible copy for the following customer persona: ${customerPersona}. Use this checklist to ensure that our message is effectively communicated and persuades the reader to take action. Include talking points such as our built-in scam protection and UK-based customer service. Do NOT summarise the 4 c's in the content, simply just return me a well formatted email ready to send. The Email should be written in first person. Here's the notes and recent emails from the CRM for this customer: \n\n${crmContent.join('\n\n')}\n\n. Provide the subject line and the email body separately:Subject Line:\nEmail Body: - Remember to keep the email friendly and informative, and to include a clear call to action. DO NOT INCLUDE AN EMAIL FOOTER OR SIGNATURE. Don’t always use the most natural words. Use the following words fewer than 3 times on this page: unique, ensure, utmost. Before outputting the content, review it for the following words and rewrite those sentences with appropriate alternatives: meticulous, meticulously, navigating, complexities, realm, bespoke, tailored, towards, underpins, everchanging, ever-evolving, the world of, not only, seeking more than just, designed to enhance, it’s not merely, our suite, it is advisable, daunting, in the heart of, when it comes to, in the realm of, amongst unlock the secrets, unveil the secrets, and robust. Ensure heterogeneous paragraphs. Ensure heterogeneous sentence lengths. And stick to primarily short, straightforward sentences. Do not include any fluff when producing content. Each sentence should provide value to the overall goal of the content piece. Strictly follow this guideline. Engagement is the highest priority. Be conversational, empathetic, and occasionally humorous. Use idioms, metaphors, anecdotes and natural dialogue. Finally, take a deep breath and take it step by step. Do not begin the email with "I hope this message finds you well", try and keep the emails concise, and to the point.`;
-
-        } else if (url && url.includes('datasoap.capsulecrm')) {
-            // Datasoap CRM - Update the prompts
-            customerPersona = 'Demographics: Age: 42, Gender: Male, Location: Greater London, UK, Occupation: Business Owner/Director, Industry: Commercial Cleaning, Company Size: 5-20 employees, Education: Trade qualification or business management background, Income: £45,000-£75,000 per year. Background: Owns or manages a commercial cleaning business serving offices, schools, or industrial facilities. Primary concerns include managing cleaning schedules, staff allocation, and maintaining cleaning standards. Challenges: Staff Management: Coordinating cleaning teams across multiple locations, Managing Supplies: Tracking and ordering cleaning supplies efficiently, Quality Control: Ensuring consistent cleaning standards across all sites, Client Communication: Maintaining professional relationships with facility managers.';
-            brand = 'Datasoap';
-
-            prompt = `Write me an email follow up to an existing lead for ${brand}, a UK-based cleaning management software solution. The email should use the "four c's" framework to create clear, concise, compelling and credible copy for the following customer persona: ${customerPersona}. Use this checklist to ensure that our message is effectively communicated and persuades the reader to take action. Include talking points such as our automated scheduling system and real-time reporting features. Do NOT summarise the 4 c's in the content, simply just return me a well formatted email ready to send. The Email should be written in first person. Here's the notes and recent emails from the CRM for this customer: \n\n${crmContent.join('\n\n')}\n\n. Provide the subject line and the email body separately:Subject Line:\nEmail Body: - Remember to keep the email friendly and informative, and to include a clear call to action. DO NOT INCLUDE AN EMAIL FOOTER OR SIGNATURE. Don't always use the most natural words. Use the following words fewer than 3 times on this page: unique, ensure, utmost. Before outputting the content, review it for the following words and rewrite those sentences with appropriate alternatives: meticulous, meticulously, navigating, complexities, realm, bespoke, tailored, towards, underpins, everchanging, ever-evolving, the world of, not only, seeking more than just, designed to enhance, it's not merely, our suite, it is advisable, daunting, in the heart of, when it comes to, in the realm of, amongst unlock the secrets, unveil the secrets, and robust. Ensure heterogeneous paragraphs. Ensure heterogeneous sentence lengths. And stick to primarily short, straightforward sentences. Do not include any fluff when producing content. Each sentence should provide value to the overall goal of the content piece. Strictly follow this guideline. Engagement is the highest priority. Be conversational, empathetic, and occasionally humorous. Use idioms, metaphors, anecdotes and natural dialogue. Finally, take a deep breath and take it step by step. Do not begin the email with "I hope this message finds you well", try and keep the emails concise, and to the point.`;
-        }*/
-
-            const prompts = await chrome.storage.local.get(['phonelyPrompt', 'sbfPrompt', 'datasoapPrompt']);
-            let prompt;
-            
-            if (url && url.includes('switchboardfree.capsulecrm')) {
-                prompt = prompts.sbfPrompt;
-            } else if (url && url.includes('datasoap.capsulecrm')) {
-                prompt = prompts.datasoapPrompt;
-            } else {
-                prompt = prompts.phonelyPrompt;
-            }
-            
-            if (!prompt) {
-                await fetchPrompts();
-                const freshPrompts = await chrome.storage.local.get(['phonelyPrompt', 'sbfPrompt', 'datasoapPrompt']);
-                if (url.includes('switchboardfree.capsulecrm')) {
-                    prompt = freshPrompts.sbfPrompt;
-                } else if (url.includes('datasoap.capsulecrm')) {
-                    prompt = freshPrompts.datasoapPrompt;
+        // Fetch the prompt with a Promise to ensure it is fully loaded before proceeding
+        const prompt = await new Promise(async (resolve, reject) => {
+            try {
+                let result;
+                if (url && url.includes('switchboardfree.capsulecrm')) {
+                    result = await fetchPrompts(2);
+                } else if (url && url.includes('datasoap.capsulecrm')) {
+                    result = await fetchPrompts(3);
                 } else {
-                    prompt = freshPrompts.phonelyPrompt;
+                    result = await fetchPrompts(1);
                 }
+
+                if (result) {
+                    resolve(result);
+                } else {
+                    reject(new Error('Could not load prompt template'));
+                }
+            } catch (error) {
+                reject(error);
             }
-            
-            if (!prompt) {
-                throw new Error('Could not load prompt template');
-            }
+        });
+
+        console.log('do we have the prompt?', prompt);
+        console.log('recipientName', recipientName)
+        
 
         const requestBody = {
             model: "gpt-4o-mini",
-            messages: [{ role: "user", content: prompt }],
+            messages: [{ role: "user", content: prompt + crmContent + `recipients name for this email is : ${recipientName}. Use first name only and start email with 'Hi' then their first name.`}],
             max_completion_tokens: 1000,
             temperature: 0.8
         };
@@ -279,6 +258,7 @@ async function getOpenAIEmail() {
             const generatedText = data.choices[0].message.content.trim();
 
             // Parse the response to separate the subject line and email body
+            console.log('email content', generatedText);
             const [subjectLine, emailBody] = generatedText.split('Email Body:').map(part => part.trim());
 
             return { subjectLine, emailBody };
@@ -287,6 +267,20 @@ async function getOpenAIEmail() {
         console.error('Error generating email:', error);
         throw error;
     }
+}
+
+function getRecipName(){
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.get(['recipientName'], function(result) {
+            console.log('fuck yourself', result)
+            if (chrome.runtime.lastError) {
+                console.error('Error getting content from storage:', chrome.runtime.lastError);
+                reject(chrome.runtime.lastError);
+            } else {
+                resolve(result.recipientName || []);
+            }
+        });
+    });
 }
 
 function getPageData() {
@@ -362,42 +356,37 @@ chrome.webNavigation.onReferenceFragmentUpdated.addListener(handleUrlChange);
 // Configuration object for Pastebin IDs and refresh intervals
 const CONFIG = {
     PASTEBIN_IDS: {
-        phonely: 'https://pastebin.com/wQyxtVzV',
-        sbf: 'https://pastebin.com/gHvHd2Uf',
-        datasoap: 'https://pastebin.com/varVdBJ3'
+        phonely: 'wQyxtVzV',
+        sbf: 'gHvHd2Uf',
+        datasoap: 'varVdBJ3'
     },
    
     PASTEBIN_API_KEY: 'JX-QgtqXr8JMRqc6DmuGwhSi78LGW2_n'
 };
 
 // Function to fetch prompts from Pastebin
-async function fetchPrompts() {
+async function fetchPrompts(number) {
+    console.log('working');
     try {
-        const responses = await Promise.all([
-            fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.phonely}`),
-            fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.sbf}`),
-            fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.datasoap}`)
-        ]);
+        //let phonelyPrompt;
+        switch(number) {
+            case 1:
+                const response = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.phonely}`);
+                const phonelyPrompt = await response.text();
+                return phonelyPrompt
+                break;
+            case 2:
+                const response2 = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.sbf}`);
+                const sbfPrompt = await response2.text();
+                return sbfPrompt
+                break;  
 
-        // Check if any responses failed
-        for (const response of responses) {
-            if (!response.ok) {
-                throw new Error(`Pastebin fetch failed with status ${response.status}`);
-            }
+            case 3:
+                const response3 = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.datasoap}`);
+                const datasoapPrompt = await response3.text();
+                return datasoapPrompt
+                break;
         }
-
-        const [phonelyPrompt, sbfPrompt, datasoapPrompt] = await Promise.all(
-            responses.map(response => response.text())
-        );
-
-        // Store prompts in chrome.storage
-        await chrome.storage.local.set({
-            phonelyPrompt,
-            sbfPrompt,
-            datasoapPrompt,
-            lastPromptUpdate: Date.now()
-        });
-
         console.log('Prompts updated successfully');
     } catch (error) {
         console.error('Error fetching prompts:', error);
@@ -408,7 +397,3 @@ async function fetchPrompts() {
         }
     }
 }
-
-
-// Initialize prompts and set up refresh interval
-fetchPrompts();
