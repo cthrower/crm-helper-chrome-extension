@@ -365,7 +365,6 @@ const CONFIG = {
 
 // Function to fetch prompts from Pastebin
 async function fetchPrompts(number) {
-    console.log('Getting prompt #', number);
     try {
         //let phonelyPrompt;
         switch(number) {
