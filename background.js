@@ -197,7 +197,7 @@ async function getOpenAIEmail() {
                 let result;
                 if (url && url.includes('switchboardfree.capsulecrm')) {
                     result = await fetchPrompts(2);
-                } else if (url && url.includes('datasoap.capsulecrm')) {
+                } else if (url && url.includes('liquid11.capsulecrm')) {
                     result = await fetchPrompts(3);
                 } else {
                     result = await fetchPrompts(1);
@@ -215,7 +215,6 @@ async function getOpenAIEmail() {
 
         console.log('do we have the prompt?', prompt);
         console.log('recipientName', recipientName)
-        
 
         const requestBody = {
             model: "gpt-4o-mini",
@@ -366,34 +365,24 @@ const CONFIG = {
 
 // Function to fetch prompts from Pastebin
 async function fetchPrompts(number) {
-    console.log('working');
+    console.log('Getting prompt #', number);
     try {
         //let phonelyPrompt;
         switch(number) {
             case 1:
-                const response = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.phonely}`);
+                const response = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.phonely}?v=${Date.now()}`);
                 const phonelyPrompt = await response.text();
                 return phonelyPrompt
-                break;
             case 2:
-                const response2 = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.sbf}`);
+                const response2 = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.sbf}?v=${Date.now()}`);
                 const sbfPrompt = await response2.text();
                 return sbfPrompt
-                break;  
-
             case 3:
-                const response3 = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.datasoap}`);
+                const response3 = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.datasoap}?v=${Date.now()}`);
                 const datasoapPrompt = await response3.text();
                 return datasoapPrompt
-                break;
         }
-        console.log('Prompts updated successfully');
     } catch (error) {
         console.error('Error fetching prompts:', error);
-        // If fetch fails, try to use cached prompts
-        const cached = await chrome.storage.local.get(['phonelyPrompt', 'sbfPrompt', 'datasoapPrompt']);
-        if (!cached.phonelyPrompt || !cached.sbfPrompt || !cached.datasoapPrompt) {
-            throw new Error('No cached prompts available');
-        }
     }
 }
