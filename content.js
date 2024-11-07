@@ -105,7 +105,6 @@ function getContent() {
             });
         }
 
-        console.log('hello', crmName)
 
         entryBodies.forEach(entryBody => {
             const preElement = entryBody.querySelector('pre.pre');

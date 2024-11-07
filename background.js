@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "generateEmail")  {
         getOpenAIEmail()
             .then(generatedEmail => {
-                console.log('did we get here?', generatedEmail);
+                
                 sendResponse({ email: generatedEmail });
             })
             .catch(error => {
@@ -197,7 +197,7 @@ async function getOpenAIEmail() {
                 let result;
                 if (url && url.includes('switchboardfree.capsulecrm')) {
                     result = await fetchPrompts(2);
-                } else if (url && url.includes('datasoap.capsulecrm')) {
+                } else if (url && url.includes('liquid11.capsulecrm')) {
                     result = await fetchPrompts(3);
                 } else {
                     result = await fetchPrompts(1);
@@ -213,8 +213,6 @@ async function getOpenAIEmail() {
             }
         });
 
-        console.log('do we have the prompt?', prompt);
-        console.log('recipientName', recipientName)
         
 
         const requestBody = {
@@ -272,7 +270,6 @@ async function getOpenAIEmail() {
 function getRecipName(){
     return new Promise((resolve, reject) => {
         chrome.storage.local.get(['recipientName'], function(result) {
-            console.log('fuck yourself', result)
             if (chrome.runtime.lastError) {
                 console.error('Error getting content from storage:', chrome.runtime.lastError);
                 reject(chrome.runtime.lastError);
@@ -366,7 +363,6 @@ const CONFIG = {
 
 // Function to fetch prompts from Pastebin
 async function fetchPrompts(number) {
-    console.log('working');
     try {
         //let phonelyPrompt;
         switch(number) {
