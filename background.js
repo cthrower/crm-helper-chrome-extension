@@ -367,29 +367,19 @@ async function fetchPrompts(number) {
         //let phonelyPrompt;
         switch(number) {
             case 1:
-                const response = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.phonely}`);
+                const response = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.phonely}?v=${Date.now()}`);
                 const phonelyPrompt = await response.text();
                 return phonelyPrompt
-                break;
             case 2:
-                const response2 = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.sbf}`);
+                const response2 = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.sbf}?v=${Date.now()}`);
                 const sbfPrompt = await response2.text();
                 return sbfPrompt
-                break;  
-
             case 3:
-                const response3 = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.datasoap}`);
+                const response3 = await fetch(`https://pastebin.com/raw/${CONFIG.PASTEBIN_IDS.datasoap}?v=${Date.now()}`);
                 const datasoapPrompt = await response3.text();
                 return datasoapPrompt
-                break;
         }
-        console.log('Prompts updated successfully');
     } catch (error) {
         console.error('Error fetching prompts:', error);
-        // If fetch fails, try to use cached prompts
-        const cached = await chrome.storage.local.get(['phonelyPrompt', 'sbfPrompt', 'datasoapPrompt']);
-        if (!cached.phonelyPrompt || !cached.sbfPrompt || !cached.datasoapPrompt) {
-            throw new Error('No cached prompts available');
-        }
     }
 }
