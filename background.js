@@ -1,15 +1,3 @@
-/*chrome.storage.local.set({ apiKeyPhonely: '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' }, function() {
-    console.log('Phonely API key stored');
-});
-
-chrome.storage.local.set({ apiKeySbf: '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' }, function() {
-    console.log('SBF API key stored');
-}); */
-
-
-
-
-
 chrome.storage.local.set({ testMode: false }, function() {
     console.log('Test Mode Stored');
 });
