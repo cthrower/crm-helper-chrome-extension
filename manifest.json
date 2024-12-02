@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Capsule CRM Helper",
   "description": "Use OpenAI's API to generate email content and summaries based on Capsule CRM data.",
-  "version": "1.3",
+  "version": "1.3.1",
   "permissions": [
     "activeTab",
     "storage",
