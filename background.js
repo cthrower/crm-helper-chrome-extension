@@ -43,7 +43,35 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function getOpenAIRewrite(){
-    const apiKey = await getApiKey();
+
+    const focusedWindowId = await new Promise((resolve, reject) => {
+        chrome.windows.getCurrent((window) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError)
+            } else {
+                resolve(window.id)
+            }
+        })
+    })
+
+    const tabs = await new Promise((resolve, reject) => {
+        chrome.tabs.query({ active: true, windowId: focusedWindowId }, function(tabs) {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+            } else {
+                resolve(tabs);
+            }
+        });
+    });
+
+    if (!tabs || tabs.length === 0){
+        throw new Error('No active tab found in the focused window')
+    }
+
+    const tab = tabs[0];
+    const url = tab.url;
+
+    const apiKey = await getApiKey(url);
     const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
     try {
@@ -100,7 +128,35 @@ async function getOpenAIRewrite(){
 }
 
 async function getOpenAISummary(){
-    const apiKey = await getApiKey();
+
+    const focusedWindowId = await new Promise((resolve, reject) => {
+        chrome.windows.getCurrent((window) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError)
+            } else {
+                resolve(window.id)
+            }
+        })
+    })
+
+    const tabs = await new Promise((resolve, reject) => {
+        chrome.tabs.query({ active: true, windowId: focusedWindowId }, function(tabs) {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+            } else {
+                resolve(tabs);
+            }
+        });
+    });
+
+    if (!tabs || tabs.length === 0){
+        throw new Error('No active tab found in the focused window')
+    }
+
+    const tab = tabs[0];
+    const url = tab.url;
+
+    const apiKey = await getApiKey(url);
     const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
     try {
@@ -161,8 +217,19 @@ async function getOpenAISummary(){
 
 async function getOpenAIEmail() {
     try {
+
+        const focusedWindowId = await new Promise((resolve, reject) => {
+            chrome.windows.getCurrent((window) => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError)
+                } else {
+                    resolve(window.id)
+                }
+            })
+        })
+
         const tabs = await new Promise((resolve, reject) => {
-            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            chrome.tabs.query({ active: true, windowId: focusedWindowId }, function(tabs) {
                 if (chrome.runtime.lastError) {
                     reject(chrome.runtime.lastError);
                 } else {
@@ -170,6 +237,10 @@ async function getOpenAIEmail() {
                 }
             });
         });
+
+        if (!tabs || tabs.length === 0){
+            throw new Error('No active tab found in the focused window')
+        }
 
         const tab = tabs[0];
         const url = tab.url;
