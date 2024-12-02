@@ -346,7 +346,7 @@ const CONFIG = {
         datasoap: 'varVdBJ3'
     },
    
-    PASTEBIN_API_KEY: 'JX-QgtqXr8JMRqc6DmuGwhSi78LGW2_n'
+    //PASTEBIN_API_KEY: 'JX-QgtqXr8JMRqc6DmuGwhSi78LGW2_n'
 };
 
 // Function to fetch prompts from Pastebin

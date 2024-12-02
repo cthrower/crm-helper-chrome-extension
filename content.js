@@ -3,35 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initialize() {
-    // Find the target div
-    // const targetDiv = document.querySelector('.panel__content-right .party-index__action-buttons');
-
-    // if (targetDiv) {
-    //     // Create the Generate Email button
-    //     const generateEmailButton = document.createElement('button');
-    //     generateEmailButton.className = 'button button--secondary button--small';
-    //     generateEmailButton.textContent = 'Generate Email';
-    //     generateEmailButton.addEventListener('click', () => {
-    //         console.log('Generate Email button clicked');
-    //         chrome.runtime.sendMessage({ action: "CheckContentAndGenerateEmail" });
-    //     });
-
-    //     // Create the Summarise button
-    //     const summariseButton = document.createElement('button');
-    //     summariseButton.className = 'button button--primary button--small';
-    //     summariseButton.textContent = 'Summarise';
-    //     summariseButton.addEventListener('click', () => {
-    //         console.log('Summarise button clicked');
-    //         chrome.runtime.sendMessage({ action: "CheckContentAndGenerateSummary" });
-    //     });
-
-    //     // Append the buttons to the target div
-    //     //targetDiv.appendChild(generateEmailButton);
-    //     //targetDiv.appendChild(summariseButton);
-    // } else {
-    //     console.error('Target div not found');
-    // }
-
     clickViewMoreButtons().then(() => {
         debouncedGetContent();
     });
@@ -296,32 +267,3 @@ function CreateEmail(emailContent, subjectLine) {
         console.error('Send Email button not found');
     }
 }
-
-// Observer to detect when the email editor popup opens
-const emailEditorObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-        if (mutation.addedNodes.length) {
-            mutation.addedNodes.forEach((node) => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    const emailEditorToolbar = node.querySelector('div.email-editor-toolbar');
-                    if (emailEditorToolbar) {
-                        // Create the new button
-                        const newButton = document.createElement('button');
-                        newButton.className = 'button button--secondary button--small';
-                        newButton.textContent = 'New Button';
-                        newButton.addEventListener('click', () => {
-                            // Add your button click logic here
-                        });
-
-                        // Append the new button to the email editor toolbar
-                        //emailEditorToolbar.appendChild(newButton);
-                        emailEditorObserver.disconnect(); // Stop observing once the button is added
-                    }
-                }
-            });
-        }
-    });
-});
-
-// Start observing the document body for changes
-emailEditorObserver.observe(document.body, { childList: true, subtree: true });

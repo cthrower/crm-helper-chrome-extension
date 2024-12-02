@@ -100,3 +100,9 @@ document.getElementById('rewrite').addEventListener('click', () => {
         });
     });
 });
+
+document.getElementById('apiMenu').addEventListener('click', () => {
+    chrome.storage.local.remove(['apiKeyPhonely', 'apiKeySbf', 'apiKeyDatasoap'])
+    document.getElementById('apiKeyForm').classList.remove('hidden');
+    document.getElementById('mainContent').classList.add('hidden');
+})
