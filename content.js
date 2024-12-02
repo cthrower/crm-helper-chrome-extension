@@ -76,7 +76,6 @@ function getContent() {
             });
         }
 
-
         entryBodies.forEach(entryBody => {
             const preElement = entryBody.querySelector('pre.pre');
 

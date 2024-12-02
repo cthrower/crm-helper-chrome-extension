@@ -1,5 +1,5 @@
 chrome.storage.local.set({ testMode: false }, function() {
-    console.log('Test Mode Stored');
+    console.log(`Test Mode Stored as ${testMode}`);
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -200,8 +200,6 @@ async function getOpenAIEmail() {
                 reject(error);
             }
         });
-
-        
 
         const requestBody = {
             model: "gpt-4o-mini",
