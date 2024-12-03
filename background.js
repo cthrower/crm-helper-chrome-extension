@@ -1,5 +1,5 @@
 chrome.storage.local.set({ testMode: false }, function() {
-    console.log(`Test Mode Stored as ${testMode}`);
+    console.log(`Test Mode Stored`);
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -219,7 +219,7 @@ async function getOpenAIEmail() {
     try {
 
         const focusedWindowId = await new Promise((resolve, reject) => {
-            chrome.windows.getCurrent((window) => {
+            chrome.windows.getLastFocused((window) => {
                 if (chrome.runtime.lastError) {
                     reject(chrome.runtime.lastError)
                 } else {
