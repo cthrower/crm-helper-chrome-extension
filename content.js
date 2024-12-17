@@ -256,6 +256,40 @@ function CreateEmail(emailContent, subjectLine) {
                 emailEditorDiv.innerHTML = formattedEmailContent;
             }
 
+            const editButton = document .createElement('button')
+            editButton.innerText = 'Edit'
+            editButton.classList.add('custom-button')
+    
+            const targetButtonDiv = document.querySelector('div.form-actions__right')
+            if (targetButtonDiv){
+                targetButtonDiv.parentElement.appendChild(editButton)
+
+                editButton.addEventListener('click', () => {
+
+                    if (document.querySelector('#edit-textbox')) return
+                    
+                    const inputBox = document.createElement('textarea')
+                    inputBox.id = 'edit-textbox'
+                    inputBox.placeholder = 'What changes would you like to make?'
+                    inputBox.classList.add('custom-textarea')
+
+                    targetButtonDiv.parentElement.appendChild(inputBox)
+
+                    const submitButton = document.createElement('button')
+                    submitButton.innerText = 'Submit'
+                    submitButton.classList.add('custom-button', 'submit-button')
+                    targetButtonDiv.parentElement.appendChild(submitButton)
+
+                    submitButton.addEventListener('click', () => {
+
+                        const userInput = inputBox.value
+                        chrome.runtime.sendMessage({action: 'generateChanges', data: {userInput, emailContent}}, function(response) {
+                            //do something
+                        })
+                    })
+                })
+            }
+
             if(emailSujectLineEditorDiv && emailEditorDiv){
                 obs.disconnect();
             }
@@ -266,3 +300,5 @@ function CreateEmail(emailContent, subjectLine) {
         console.error('Send Email button not found');
     }
 }
+
+

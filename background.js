@@ -5,7 +5,6 @@ chrome.storage.local.set({ testMode: false }, function() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
 
-    // Generate an email via openAI
     if (message.action === "generateEmail")  {
         getOpenAIEmail()
             .then(generatedEmail => {
@@ -18,7 +17,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true
     }
 
-    // Generate a summary via openAI
     if(message.action === "generateSummary"){
         getOpenAISummary()
             .then(generatedSummary => {
@@ -39,6 +37,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 sendResponse({ error: error.message });
             });
         return true
+    }
+
+    if (message.action === "generateChanges"){
+        const { userInput, emailContent} = message.data
+        getOpenAIChanges(userInput, emailContent)
+            .then(amendedEmail => {
+                sendResponse({email: amendedEmail})
+            })
+            .catch(error => {
+                sendResponse({error: error.message})
+            });
+        return true;
     }
 });
 
@@ -321,6 +331,88 @@ async function getOpenAIEmail() {
     } catch (error) {
         console.error('Error generating email:', error);
         throw error;
+    }
+}
+
+async function getOpenAIChanges(userInput, oldEmailContent){
+    try{
+        const focusedWindowId = await new Promise((resolve, reject) => {
+            chrome.windows.getCurrent((window) => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError)
+                } else {
+                    resolve(window.id)
+                }
+            })
+        })
+
+        const tabs = await new Promise((resolve, reject) => {
+            chrome.tabs.query({ active: true, windowId: focusedWindowId }, function(tabs) {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                } else {
+                    resolve(tabs);
+                }
+            });
+        });
+
+        if (!tabs || tabs.length === 0){
+            throw new Error('No active tab found in the focused window')
+        }
+
+        const tab = tabs[0];
+        const url = tab.url;
+
+        const apiKey = await getApiKey(url);
+        const apiUrl = 'https://api.openai.com/v1/chat/completions';
+
+        const prompt = `This is the original email that was produced:${oldEmailContent}. The changes I want to make to it are: ${userInput}. Generate a new email, implementing these changes. Do not change the entire email, only the parts that are relevant to the given changes.`
+
+        const requestBody = {
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: prompt}],
+            max_completion_tokens: 1000,
+            temperature: 0.8
+        };
+
+        const testMode = await new Promise((resolve, reject) => {
+            chrome.storage.local.get(['testMode'], function(result) {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                } else {
+                    resolve(result.testMode);
+                }
+            });
+        });
+
+        if (testMode === true) {
+            // Testing, return some test data
+            const subjectLine = 'Test Subject Line';
+            const emailBody = 'Here\'s some random email body';
+            return { subjectLine, emailBody };
+        } else {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                throw new Error(`OpenAI API request failed with status ${response.status}`);
+            }
+
+            const data = await response.json();
+            const generatedText = data.choices[0].message.content.trim();
+
+            return generatedText
+        }
+
+    } catch (error){
+        console.error("Error generating changes", error)
+        throw error
     }
 }
 

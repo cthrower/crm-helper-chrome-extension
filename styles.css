@@ -1,18 +1,27 @@
-body {
-  width: 300px;
-  padding: 10px;
-  font-family: Arial, sans-serif;
+
+.custom-button {
+  background-color: #6A4BFF; 
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-left: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
-h1 {
-  font-size: 18px;
-}
-
-button {
-  margin: 10px 0;
-}
-
-#result {
+.custom-textarea {
+  width: 100%;
   margin-top: 10px;
-  white-space: pre-wrap;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  box-sizing: border-box; 
+}
+
+.submit-button {
+  margin-top: 10px;
+  display: block; 
 }
