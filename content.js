@@ -279,16 +279,15 @@ function createEmail(emailContent, subjectLine) {
                     submitButton.innerText = 'Submit';
                     submitButton.classList.add('custom-button', 'submit-button');
                     targetButtonDiv.parentElement.appendChild(submitButton);
+                    
+                    const spinner = document.createElement('span');
+                    spinner.className = 'spinner'
+                    spinner.style.display = 'none';
+                    submitButton.appendChild(spinner);
 
                     submitButton.addEventListener('click', () => {
                         const userInput = inputBox.value;
-
-                        const loadingText = document.createElement('p');
-                        loadingText.innerText = 'Generating, please wait';
-                        loadingText.style.color = 'grey';
-                        loadingText.style.fontSize = '10px';
-                        loadingText.id = 'loading-text';
-                        submitButton.insertAdjacentElement('afterend', loadingText);
+                        spinner.style.display = 'inline-block';
 
                         chrome.runtime.sendMessage({ action: 'generateChanges', data: { userInput, emailContent } }, function(response) {
                             const formattedEmailContent = `
@@ -302,8 +301,8 @@ function createEmail(emailContent, subjectLine) {
                             `;
                             emailEditorDiv.innerHTML = formattedEmailContent;
                             emailContent = response.email;
-                                    
-                            loadingText.remove();
+
+                            spinner.style.display = 'none';
                         });
                     });
                 });
