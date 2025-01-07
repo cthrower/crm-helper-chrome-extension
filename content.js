@@ -135,7 +135,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "CheckContentAndGenerateEmail") {
         getContent().then(() => {
             chrome.runtime.sendMessage({ action: "generateEmail" }, function(response) {
-                CreateEmail(response.email.emailBody.replace('**\n\n', ''), response.email.subjectLine);
+                createEmail(response.email.emailBody.replace('**\n\n', ''), response.email.subjectLine);
                 sendResponse({ email: response.email });
             });
         }).catch((error) => {
@@ -230,7 +230,7 @@ function ShowSummary(summaryContent) {
     }
 }
 
-function CreateEmail(emailContent, subjectLine) {
+function createEmail(emailContent, subjectLine) {
     const sendEmailButton = document.querySelector('button[data-pendo="send-email-button"]');
 
     if (sendEmailButton) {
@@ -256,41 +256,60 @@ function CreateEmail(emailContent, subjectLine) {
                 emailEditorDiv.innerHTML = formattedEmailContent;
             }
 
-            const editButton = document .createElement('button')
-            editButton.innerText = 'Edit'
-            editButton.classList.add('custom-button')
-    
-            const targetButtonDiv = document.querySelector('div.form-actions__right')
-            if (targetButtonDiv){
-                targetButtonDiv.parentElement.appendChild(editButton)
+            const editButton = document.createElement('button');
+            editButton.innerText = 'Edit';
+            editButton.classList.add('custom-button');
+
+            const targetButtonDiv = document.querySelector('div.form-actions__right');
+            if (targetButtonDiv) {
+                targetButtonDiv.parentElement.appendChild(editButton);
 
                 editButton.addEventListener('click', () => {
+                    editButton.style.display = 'none';
 
-                    if (document.querySelector('#edit-textbox')) return
-                    
-                    const inputBox = document.createElement('textarea')
-                    inputBox.id = 'edit-textbox'
-                    inputBox.placeholder = 'What changes would you like to make?'
-                    inputBox.classList.add('custom-textarea')
+                    if (document.querySelector('#edit-textbox')) return;
 
-                    targetButtonDiv.parentElement.appendChild(inputBox)
+                    const inputBox = document.createElement('textarea');
+                    inputBox.id = 'edit-textbox';
+                    inputBox.placeholder = 'What changes would you like to make?';
+                    inputBox.classList.add('custom-textarea');
+                    targetButtonDiv.parentElement.appendChild(inputBox);
 
-                    const submitButton = document.createElement('button')
-                    submitButton.innerText = 'Submit'
-                    submitButton.classList.add('custom-button', 'submit-button')
-                    targetButtonDiv.parentElement.appendChild(submitButton)
+                    const submitButton = document.createElement('button');
+                    submitButton.innerText = 'Submit';
+                    submitButton.classList.add('custom-button', 'submit-button');
+                    targetButtonDiv.parentElement.appendChild(submitButton);
 
                     submitButton.addEventListener('click', () => {
+                        const userInput = inputBox.value;
 
-                        const userInput = inputBox.value
-                        chrome.runtime.sendMessage({action: 'generateChanges', data: {userInput, emailContent}}, function(response) {
-                            //do something
-                        })
-                    })
-                })
+                        const loadingText = document.createElement('p');
+                        loadingText.innerText = 'Generating, please wait';
+                        loadingText.style.color = 'grey';
+                        loadingText.style.fontSize = '10px';
+                        loadingText.id = 'loading-text';
+                        submitButton.insertAdjacentElement('afterend', loadingText);
+
+                        chrome.runtime.sendMessage({ action: 'generateChanges', data: { userInput, emailContent } }, function(response) {
+                            const formattedEmailContent = `
+                            <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                                ${response.email
+                                    .split('\n')
+                                    .filter(line => line.trim() !== '')
+                                    .map(line => `<p>${line}</p>`)
+                                    .join('')}
+                            </div>
+                            `;
+                            emailEditorDiv.innerHTML = formattedEmailContent;
+                            emailContent = response.email;
+                                    
+                            loadingText.remove();
+                        });
+                    });
+                });
             }
 
-            if(emailSujectLineEditorDiv && emailEditorDiv){
+            if (emailSujectLineEditorDiv && emailEditorDiv) {
                 obs.disconnect();
             }
         });

@@ -41,6 +41,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.action === "generateChanges"){
         const { userInput, emailContent} = message.data
+        console.log("submit button message receieved", userInput, emailContent)
         getOpenAIChanges(userInput, emailContent)
             .then(amendedEmail => {
                 sendResponse({email: amendedEmail})
@@ -366,7 +367,7 @@ async function getOpenAIChanges(userInput, oldEmailContent){
         const apiKey = await getApiKey(url);
         const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
-        const prompt = `This is the original email that was produced:${oldEmailContent}. The changes I want to make to it are: ${userInput}. Generate a new email, implementing these changes. Do not change the entire email, only the parts that are relevant to the given changes.`
+        const prompt = `This is the original email that was produced:${oldEmailContent}. The changes I want to make to it are: ${userInput}. Generate a new email, implementing these changes. Do not change the entire email, only the parts that are relevant to the given changes. Do not produce a subject line, just the main email body.`
 
         const requestBody = {
             model: "gpt-4o-mini",
@@ -406,6 +407,8 @@ async function getOpenAIChanges(userInput, oldEmailContent){
 
             const data = await response.json();
             const generatedText = data.choices[0].message.content.trim();
+
+            console.log("new email: ", generatedText)
 
             return generatedText
         }
